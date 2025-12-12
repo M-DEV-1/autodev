@@ -1,34 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { CodeRabbitIcon } from "@/components/ui/Icons";
-import { cn } from "@/lib/utils";
 
 export function Header() {
     return (
-        <header className="sticky top-0 w-full z-50 border-b border-white/5 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/20">
-            <div className="container flex h-16 items-center justify-between">
-                {/* Logo */}
+        <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
+            <div className="rounded-full border border-white/10 bg-black/50 backdrop-blur-xl shadow-2xl shadow-black/50 px-4 md:px-6 h-14 flex items-center justify-between supports-[backdrop-filter]:bg-black/20">
+
                 <div className="flex items-center gap-2">
-                    <CodeRabbitIcon className="h-6 w-6 text-orange-500" />
-                    <span className="text-lg font-bold tracking-tight text-white">AutoDev</span>
+                    <Image
+                        src="/logo.svg"
+                        alt="AutoDev"
+                        width={24}
+                        height={24}
+                        className="h-6 w-6"
+                    />
+                    <span className="text-base font-bold tracking-tight text-white hidden sm:block">AutoDev</span>
                 </div>
 
-                {/* Nav Links - Hidden on mobile, flex on md */}
-                <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
+                <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground/80">
                     <Link href="#features" className="hover:text-white transition-colors">Features</Link>
                     <Link href="#how-it-works" className="hover:text-white transition-colors">How It Works</Link>
-                    <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
                     <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
                 </nav>
 
-                {/* Actions */}
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" className="hidden sm:flex text-muted-foreground hover:text-white">
-                        Log in
-                    </Button>
-                    <Button size="sm" className="bg-orange-600 hover:bg-orange-500 text-white border-none shadow-lg shadow-orange-500/20 rounded-full px-6">
+                <div className="flex items-center gap-3">
+                    <Button size="sm" className="bg-orange-600 hover:bg-orange-500 text-white border-none rounded-full px-5 h-8 text-xs font-semibold">
                         Get Started
                     </Button>
                 </div>

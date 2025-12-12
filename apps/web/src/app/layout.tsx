@@ -7,8 +7,11 @@ import { cn } from '@/lib/utils';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'AutoDev Ops Agent',
-    description: 'Autonomous Developer Platform',
+    title: 'AutoDev',
+    description: 'Autonomous Prompt to Production',
+    icons: {
+        icon: '/favicon.svg',
+    },
 };
 
 export default function RootLayout({

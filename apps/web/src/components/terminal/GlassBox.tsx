@@ -1,10 +1,9 @@
-import { TerminalIcon, Minus, Square, X } from "lucide-react";
+import { TerminalIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function GlassBox({ children, className }: { children?: React.ReactNode, className?: string }) {
     return (
         <div className={cn("relative group", className)}>
-            {/* Glass Container */}
             <div className="
         relative z-10
         bg-black/40 backdrop-blur-xl
@@ -13,9 +12,8 @@ export function GlassBox({ children, className }: { children?: React.ReactNode, 
         shadow-2xl shadow-black/50
         transition-all duration-300
         hover:border-white/20
-        h-[500px] flex flex-col
+        min-h-[500px] flex flex-col
       ">
-                {/* Terminal Header */}
                 <div className="h-10 bg-white/5 border-b border-white/10 flex items-center justify-between px-4 select-none">
                     <div className="flex items-center gap-2">
                         <TerminalIcon className="w-4 h-4 text-muted-foreground" />
@@ -28,10 +26,8 @@ export function GlassBox({ children, className }: { children?: React.ReactNode, 
                     </div>
                 </div>
 
-                {/* Content Area */}
                 <div className="flex-1 p-0 overflow-hidden relative font-mono text-sm">
                     {children}
-                    {/* Scanline Effect */}
                     <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] opacity-10" />
                 </div>
             </div>
