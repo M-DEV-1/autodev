@@ -12,28 +12,28 @@ export function Features() {
             description: "Uses Together AI to decompose potential PRs into actionable steps.",
             icon: Box,
             className: "md:col-span-2",
-            image: "/feature-blue-context.png"
+            image: "/assets/feature-blue-context.png"
         },
         {
             title: "Build in Sandbox",
             description: "Agents execution via Cline in secured containers.",
             icon: Terminal,
             className: "md:col-span-1",
-            image: "/feature-orange-context.png"
+            image: "/assets/feature-orange-context.png"
         },
         {
             title: "Deploy Instantly",
             description: "Seamless Kestra pipelines to Vercel.",
             icon: Zap,
             className: "md:col-span-1",
-            image: "/feature-pink-context.png"
+            image: "/assets/feature-pink-context.png"
         },
         {
             title: "Secure by Default",
             description: "Enterprise-grade encryption and access control for your repo.",
             icon: Fingerprint,
             className: "md:col-span-2",
-            image: "/feature-green-context.png"
+            image: "/assets/feature-green-context.png"
         },
     ];
 

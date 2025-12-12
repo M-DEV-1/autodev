@@ -49,7 +49,7 @@ export function Footer() {
                             <Image src="/logo.svg" alt="AutoDev" width={32} height={32} className="h-8 w-8" />
                             <span className="text-xl font-bold text-white">AutoDev</span>
                         </div>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-slate-400">
                             Autonomous Development Platform powered by the next generation of AI agents.
                         </p>
                     </div>
@@ -75,8 +75,8 @@ export function Footer() {
                     </div>
 
                     <div className="space-y-4">
-                        <h4 className="text-sm font-semibold text-white uppercase tracking-wider">Stay Updated</h4>
-                        <p className="text-xs text-slate-500">Subscribe to our newsletter for the latest AI updates.</p>
+                        <h4 className="text-sm font-semibold text-white uppercase tracking-wider">Give me</h4>
+                        <p className="text-xs text-slate-400">your data.</p>
                         <div className="flex gap-2">
                             <Input
                                 type="email"
@@ -89,13 +89,13 @@ export function Footer() {
                 </div>
 
                 <div className="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-xs text-slate-600">
-                        © 2024 AutoDev Inc. All rights reserved.
+                    <p className="text-xs text-slate-400">
+                        © {new Date().getFullYear()} AutoDev Inc. All rights reserved.
                     </p>
                     <div className="flex gap-6 text-slate-600">
-                        <Github className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
-                        <Twitter className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
-                        <Linkedin className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
+                        <Github href="https://github.com/M-DEV-1/autodev" className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
+                        <Twitter href="https://x.com/mdev_1" className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
+                        <Linkedin href="https://linkedin.com/in/ksmahadevan" className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
                     </div>
                 </div>
             </div>

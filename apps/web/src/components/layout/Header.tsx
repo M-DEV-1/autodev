@@ -27,7 +27,7 @@ export function Header() {
                 </nav>
 
                 <div className="flex items-center gap-3">
-                    <Button size="sm" className="bg-orange-600 hover:bg-orange-500 text-white border-none rounded-full px-5 h-8 text-xs font-semibold">
+                    <Button size="sm" className="bg-orange-700 hover:bg-orange-600 text-white border-none rounded-full px-5 h-8 text-xs font-semibold">
                         Get Started
                     </Button>
                 </div>

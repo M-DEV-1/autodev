@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PARTNERS } from "@/lib/constants";
 import { TerminalFeed } from "@/components/terminal/TerminalFeed";
+import { Marquee } from "@/components/ui/marquee";
 
 export default function Home() {
     return (
@@ -24,27 +25,35 @@ export default function Home() {
                 </div>
 
                 <div className="mt-24 mb-8 relative z-20 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                    <p className="text-center text-sm font-medium text-slate-500 mb-5 uppercase tracking-wider">
+                    <p className="text-center text-sm font-medium text-slate-400 mb-5 uppercase tracking-wider">
                         Powered by
                     </p>
-                    <div className="flex flex-wrap md:flex-nowrap justify-center items-center gap-8 md:gap-14 w-full max-w-6xl px-4 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-                        {PARTNERS.map((partner) => (
-                            <Link
-                                href={partner.url}
-                                key={partner.name}
-                                className="group relative flex items-center justify-center transition-transform hover:scale-110 duration-300"
-                            >
-                                <div className="h-12 md:h-8 w-auto relative">
-                                    <Image
-                                        src={partner.logo}
-                                        alt={partner.name}
-                                        width={160}
-                                        height={40}
-                                        className="h-full w-auto object-contain"
-                                    />
-                                </div>
-                            </Link>
-                        ))}
+                    <div className="w-full max-w-6xl px-4 relative">
+                        {/* Gradient masks for smooth fade effect */}
+                        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+
+                        <Marquee className="[--duration:30s] [--gap:3rem] py-4" pauseOnHover>
+                            {PARTNERS.map((partner) => (
+                                <Link
+                                    href={partner.url}
+                                    key={partner.name}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative flex items-center justify-center transition-opacity hover:opacity-100 opacity-60 grayscale hover:grayscale-0 duration-300 mx-4"
+                                >
+                                    <div className="h-8 md:h-10 w-auto relative">
+                                        <Image
+                                            src={partner.logo}
+                                            alt={partner.name}
+                                            width={160}
+                                            height={40}
+                                            className="h-full w-auto object-contain"
+                                        />
+                                    </div>
+                                </Link>
+                            ))}
+                        </Marquee>
                     </div>
                 </div>
             </div>

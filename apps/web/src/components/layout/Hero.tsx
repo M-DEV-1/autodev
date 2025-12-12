@@ -40,7 +40,7 @@ export function Hero() {
                         transition={{ duration: 0.5 }}
                     >
 
-                        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-3 drop-shadow-sm">
+                        <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight text-white mb-3 drop-shadow-sm">
                             Build Software <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-500 to-blue-500 animate-gradient">
                                 At The Speed of Thought
@@ -49,11 +49,10 @@ export function Hero() {
 
                         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-5">
                             Coordinate planning, coding, and deployment with a single prompt.
-                            Powered by the world&apos;s best AI engineering tools.
                         </p>
 
                         <div className="flex gap-4 justify-center">
-                            <Button size="lg" className="h-10 px-8 text-base font-semibold shadow-lg shadow-orange-500/20">
+                            <Button size="lg" className="h-10 px-8 text-base font-semibold shadow-lg shadow-orange-500/20 bg-orange-700 hover:bg-orange-600 text-white">
                                 Start Building
                             </Button>
                             <Button variant="outline" size="lg" className="h-10 px-8 text-base bg-background/50 backdrop-blur-sm border-slate-700">
