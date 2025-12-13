@@ -1,6 +1,7 @@
 import path from "path";
 import express from "express";
-import { createServer } from "http";
+import { createServer as createHttpServer } from "http";
+import { createServer as createHttpsServer } from "https";
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -18,7 +19,18 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/autodev")
     .catch(err => console.error("MongoDB connection error:", err));
 
 const app = express();
-const httpServer = createServer(app);
+
+// Try to load certificates
+let httpServer: any;
+try {
+    const key = fs.readFileSync(path.join(__dirname, '../certs/server.key'));
+    const cert = fs.readFileSync(path.join(__dirname, '../certs/server.crt'));
+    httpServer = createHttpsServer({ key, cert }, app);
+    console.log("🔒 Starting in HTTPS mode");
+} catch (e) {
+    console.log("⚠️ Certificates not found, falling back to HTTP");
+    httpServer = createHttpServer(app);
+}
 
 // Configure CORS for both Express and Socket.IO
 const allowedOrigins = [
@@ -178,9 +190,15 @@ app.get("/health", (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
+import https from "https";
+// ... (imports)
+
+// ...
+
 httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || `http://localhost:${PORT}`;
+    const protocol = httpServer instanceof https.Server ? 'https' : 'http';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || `${protocol}://localhost:${PORT}`;
     console.log(`📍 Health check: ${baseUrl}/health`);
 });
 
