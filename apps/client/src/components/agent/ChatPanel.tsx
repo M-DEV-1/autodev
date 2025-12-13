@@ -2,10 +2,9 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Bot, User } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GlassBox } from "@/components/terminal/GlassBox";
 import { cn } from "@/lib/utils";
 
 import { useEffect, useRef, useCallback } from "react";
