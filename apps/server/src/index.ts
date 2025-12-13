@@ -1,7 +1,7 @@
 import path from "path";
 import express from "express";
 import { createServer as createHttpServer } from "http";
-import { createServer as createHttpsServer } from "https";
+import https, { createServer as createHttpsServer } from "https";
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -141,6 +141,7 @@ app.post("/api/run", async (req, res) => {
     }
 });
 
+
 app.get("/api/projects/:projectId/files", async (req, res) => {
     try {
         const { projectId } = req.params;
@@ -189,11 +190,6 @@ app.get("/health", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-
-import https from "https";
-// ... (imports)
-
-// ...
 
 httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
