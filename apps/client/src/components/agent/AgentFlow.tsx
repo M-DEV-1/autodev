@@ -15,7 +15,7 @@ export function AgentFlow({ onClose, initialMode = 'new' }: AgentFlowProps) {
 
     const handleStartProject = async (prompt: string) => {
         try {
-            const response = await fetch('http://localhost:3002/api/projects', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

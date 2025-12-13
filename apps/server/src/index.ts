@@ -21,8 +21,8 @@ const httpServer = createServer(app);
 
 // Configure CORS for both Express and Socket.IO
 const allowedOrigins = [
-    "http://localhost:3000",
-    process.env.ALLOWED_ORIGINS || "*",
+    process.env.NEXT_PUBLIC_CLIENT_URL || "",
+    process.env.ALLOWED_ORIGINS || "",
 ];
 
 app.use(
@@ -144,9 +144,9 @@ app.get("/health", (req, res) => {
     res.json({ status: "ok" });
 });
 
-const PORT = 3002;
+const PORT = process.env.PORT;
 
 httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log(`📍 Health check: http://localhost:${PORT}/health`);
+    console.log(`📍 Health check: http://${process.env.NEXT_PUBLIC_API_URL}:${PORT}/health`);
 });

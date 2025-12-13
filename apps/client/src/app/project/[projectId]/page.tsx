@@ -24,7 +24,7 @@ export default function ProjectPage({ params, searchParams }: ProjectPageProps) 
     useEffect(() => {
         if (!projectId) return;
 
-        fetch(`http://localhost:3002/api/projects/${projectId}`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${projectId}`)
             .then(res => {
                 if (!res.ok) {
                     console.error("Project not found");

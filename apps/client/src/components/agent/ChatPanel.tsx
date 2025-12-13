@@ -7,15 +7,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, memo } from "react";
+import { useProjectStore } from "@/store/project";
 
 interface ChatPanelProps {
     projectId: string;
     initialPrompt?: string;
 }
 
+const ChatMessageItem = memo(({ msg }: { msg: { role: 'user' | 'agent', content: string } }) => (
+    <div className={cn("flex flex-col gap-2 max-w-[90%]", msg.role === 'user' ? "ml-auto items-end" : "items-start")}>
+        {/* Bubble */}
+        <div className={cn(
+            "px-4 py-3 text-sm leading-relaxed shadow-sm",
+            msg.role === 'agent'
+                ? "bg-[#1A1A1C] text-slate-200 rounded-2xl rounded-tl-sm border border-white/5"
+                : "bg-blue-600 text-white rounded-2xl rounded-tr-sm"
+        )}>
+            {msg.content}
+        </div>
+        {/* Avatar / Metadata (Minimal) */}
+        <div className="text-[10px] text-slate-600 px-1">
+            {msg.role === 'agent' ? 'AutoDev' : 'You'}
+        </div>
+    </div>
+));
+ChatMessageItem.displayName = 'ChatMessageItem';
+
 export function ChatPanel({ projectId, initialPrompt }: ChatPanelProps) {
-    const [messages, setMessages] = useState<{ role: 'user' | 'agent', content: string }[]>([]);
+    const { messages, addMessage } = useProjectStore();
     const [input, setInput] = useState("");
     const hasStartedRef = useRef(false);
 
@@ -24,13 +44,12 @@ export function ChatPanel({ projectId, initialPrompt }: ChatPanelProps) {
         if (!text.trim()) return;
 
         if (!msgContent) {
-            // Only add to messages if it wasn't the initialPrompt (which we added in useEffect)
-            setMessages(prev => [...prev, { role: 'user', content: text }]);
+            addMessage({ role: 'user', content: text });
             setInput("");
         }
 
         try {
-            const response = await fetch('http://localhost:3002/api/run', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/run`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -41,23 +60,21 @@ export function ChatPanel({ projectId, initialPrompt }: ChatPanelProps) {
 
             if (!response.ok) throw new Error('Failed to start agent');
 
-            setMessages(prev => [...prev, { role: 'agent', content: "I've started working on that. Check the terminal for live updates." }]);
+            addMessage({ role: 'agent', content: "I've started working on that. Check the terminal for live updates." });
         } catch (error) {
             console.error(error);
-            setMessages(prev => [...prev, { role: 'agent', content: "Sorry, something went wrong starting the agent." }]);
+            addMessage({ role: 'agent', content: "Sorry, something went wrong starting the agent." });
         }
-    }, [input]);
+    }, [input, addMessage, projectId]);
 
     // Initial Send Logic
     useEffect(() => {
         if (initialPrompt && !hasStartedRef.current) {
             hasStartedRef.current = true;
-            // Add initial user message locally
-            setMessages([{ role: 'user', content: initialPrompt }]);
-            // Trigger API
+            addMessage({ role: 'user', content: initialPrompt });
             handleSend(initialPrompt);
         }
-    }, [initialPrompt, handleSend]);
+    }, [initialPrompt, handleSend, addMessage]);
 
     return (
         <div className="h-full flex flex-col bg-transparent">
@@ -69,21 +86,7 @@ export function ChatPanel({ projectId, initialPrompt }: ChatPanelProps) {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto space-y-6 p-4">
                 {messages.map((msg, i) => (
-                    <div key={i} className={cn("flex flex-col gap-2 max-w-[90%]", msg.role === 'user' ? "ml-auto items-end" : "items-start")}>
-                        {/* Bubble */}
-                        <div className={cn(
-                            "px-4 py-3 text-sm leading-relaxed shadow-sm",
-                            msg.role === 'agent'
-                                ? "bg-[#1A1A1C] text-slate-200 rounded-2xl rounded-tl-sm border border-white/5"
-                                : "bg-blue-600 text-white rounded-2xl rounded-tr-sm"
-                        )}>
-                            {msg.content}
-                        </div>
-                        {/* Avatar / Metadata (Minimal) */}
-                        <div className="text-[10px] text-slate-600 px-1">
-                            {msg.role === 'agent' ? 'AutoDev' : 'You'}
-                        </div>
-                    </div>
+                    <ChatMessageItem key={i} msg={msg} />
                 ))}
                 {messages.length === 0 && (
                     <div className="h-full flex flex-col items-center justify-center text-slate-500 text-sm">
