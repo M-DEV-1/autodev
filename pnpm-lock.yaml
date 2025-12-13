@@ -132,6 +132,9 @@ importers:
       express:
         specifier: ^4.18.2
         version: 4.22.1
+      mongoose:
+        specifier: ^9.0.1
+        version: 9.0.1
       node-pty:
         specifier: ^1.0.0
         version: 1.0.0

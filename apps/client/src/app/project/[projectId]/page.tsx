@@ -5,6 +5,8 @@ import { ChatPanel } from "@/components/agent/ChatPanel";
 import { TerminalPanel } from "@/components/agent/TerminalPanel";
 import { RightPanel } from "@/components/agent/RightPanel";
 
+import { useEffect } from "react";
+
 interface ProjectPageProps {
     params: {
         projectId: string;
@@ -18,7 +20,19 @@ export default function ProjectPage({ params, searchParams }: ProjectPageProps) 
     const { projectId } = params;
     const { prompt } = searchParams;
 
-    // TODO: Validate projectId and fetch project details if needed
+    // Validation Effect
+    useEffect(() => {
+        if (!projectId) return;
+
+        fetch(`http://localhost:3002/api/projects/${projectId}`)
+            .then(res => {
+                if (!res.ok) {
+                    console.error("Project not found");
+                    // Optionally redirect to 404 or dashboard
+                }
+            })
+            .catch(err => console.error("Failed to validate project:", err));
+    }, [projectId]);
 
     return (
         <main className="min-h-screen bg-[#0A0A0B] text-slate-200 overflow-hidden font-sans">
