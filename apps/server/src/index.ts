@@ -34,9 +34,9 @@ try {
 
 // Configure CORS for both Express and Socket.IO
 const allowedOrigins = [
-    process.env.NEXT_PUBLIC_CLIENT_URL || "",
-    process.env.ALLOWED_ORIGINS || "",
-];
+    process.env.NEXT_PUBLIC_CLIENT_URL,
+    ...(process.env.ALLOWED_ORIGINS || "").split(","),
+].filter((origin): origin is string => !!origin).map(origin => origin.trim());
 
 app.use(
     cors({
