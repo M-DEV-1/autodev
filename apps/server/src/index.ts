@@ -38,6 +38,8 @@ const allowedOrigins = [
     ...(process.env.ALLOWED_ORIGINS || "").split(","),
 ].filter((origin): origin is string => !!origin).map(origin => origin.trim());
 
+console.log("🛡️ CORS Allowed Origins:", allowedOrigins);
+
 app.use(
     cors({
         origin: allowedOrigins,
