@@ -5,6 +5,10 @@ import Project from "@/models/Project";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
+// The line export const dynamic = 'force-dynamic' is a Route Segment Config option in Next.js (specifically within the app router) that forces a page or route handler to be rendered dynamically at request time, opting out of all static generation and caching.  (from docs)
+
 export async function GET() {
     const session = await getServerSession(authOptions);
 
@@ -41,7 +45,7 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { name, description, githubUrl } = await req.json();
+        const { name, description, githubUrl, prompt } = await req.json();
 
         await connectDB();
 
@@ -50,10 +54,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
+        // @ts-ignore
         const project = await Project.create({
             name,
             description,
             githubUrl,
+            prompt,
             userId: user._id as any,
         });
 
