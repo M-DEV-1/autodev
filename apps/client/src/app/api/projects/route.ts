@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { name, description, githubUrl } = await req.json();
+        const { name, description, githubUrl, prompt } = await req.json();
 
         await connectDB();
 
@@ -54,10 +54,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
+        // @ts-ignore
         const project = await Project.create({
             name,
             description,
             githubUrl,
+            prompt,
             userId: user._id as any,
         });
 
