@@ -8,9 +8,10 @@ import { GlassBox } from "@/components/terminal/GlassBox";
 
 interface InteractiveTerminalProps {
     isGuest: boolean;
+    onStartProject: () => void;
 }
 
-export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
+export function InteractiveTerminal({ isGuest, onStartProject }: InteractiveTerminalProps) {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [isTyping, setIsTyping] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -37,7 +38,7 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
             icon: Plus,
             description: 'Initialize a new project with AI scaffolding',
             disabled: false,
-            action: () => router.push('/agent?flow=new')
+            action: () => onStartProject()
         },
         {
             id: 'import',
@@ -47,7 +48,7 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
             disabled: isGuest,
             action: () => !isGuest && router.push('/agent?flow=import')
         }
-    ], [isGuest, router]);
+    ], [isGuest, router, onStartProject]);
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (loading) return;

@@ -1,19 +1,17 @@
 "use client";
+// TODO: REPLACE MOCK FS with real calls
 
 import { File, Folder, Search, ChevronRight, X } from "lucide-react";
 
 export function FileSystemPanel() {
     return (
         <div className="h-full w-full flex bg-[#0F0F11] font-mono text-xs">
-            {/* Left Sidebar: File Tree */}
             <div className="w-64 border-r border-white/5 flex flex-col bg-[#050505]">
-                {/* Header */}
                 <div className="h-10 flex items-center justify-between px-3 border-b border-white/5 shrink-0">
                     <span className="font-medium text-slate-400">Files</span>
                     <Search className="w-3.5 h-3.5 text-slate-600" />
                 </div>
 
-                {/* Tree */}
                 <div className="flex-1 p-2 overflow-y-auto space-y-0.5">
                     <div className="flex items-center gap-1 px-2 py-1 text-slate-400 hover:text-slate-200 cursor-pointer">
                         <ChevronRight className="w-3 h-3" />

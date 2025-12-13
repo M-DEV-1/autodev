@@ -6,9 +6,12 @@ import { useSession } from 'next-auth/react';
 import { InteractiveTerminal } from "@/components/dashboard/InteractiveTerminal";
 import { ProjectList } from "@/components/dashboard/ProjectList";
 
+import { AgentFlow } from "@/components/agent/AgentFlow";
+
 export default function Dashboard() {
     const { data: session, status } = useSession();
     const [isGuest, setIsGuest] = useState(false);
+    const [showAgent, setShowAgent] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -38,6 +41,10 @@ export default function Dashboard() {
         );
     }
 
+    if (showAgent) {
+        return <AgentFlow onClose={() => setShowAgent(false)} />;
+    }
+
     return (
         <div className="min-h-screen bg-[#020202] text-white pt-24 relative overflow-hidden">
             {/* Background Effects */}
@@ -62,7 +69,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Interactive Terminal */}
-                <InteractiveTerminal isGuest={isGuest} />
+                <InteractiveTerminal isGuest={isGuest} onStartProject={() => setShowAgent(true)} />
 
                 {/* Projects Grid */}
                 <div className="mt-16">
