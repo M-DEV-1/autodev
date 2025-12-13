@@ -7,7 +7,11 @@ const XTermComponent = dynamic(() => import('./XTermComponent'), {
     loading: () => <div className="h-full w-full flex items-center justify-center text-slate-600 text-xs font-mono">Initializing Terminal...</div>
 });
 
-export function TerminalPanel() {
+interface TerminalPanelProps {
+    projectId: string;
+}
+
+export function TerminalPanel({ projectId }: TerminalPanelProps) {
     return (
         <div className="h-full w-full flex flex-col bg-[#0F0F11]">
             {/* Terminal Header */}
@@ -19,7 +23,7 @@ export function TerminalPanel() {
             </div>
             {/* XTerm Container */}
             <div className="flex-1 w-full p-2 overflow-hidden">
-                <XTermComponent />
+                <XTermComponent projectId={projectId} />
             </div>
         </div>
     );

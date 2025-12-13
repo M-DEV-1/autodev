@@ -25,9 +25,9 @@ export default function ProjectPage({ params, searchParams }: ProjectPageProps) 
             {/* Header is global, but AgentLayout adds pt-20. We might need a ProjectHeader instead? 
              For now, relying on global Header. */}
             <AgentLayout
-                chatPanel={<ChatPanel initialPrompt={prompt} />}
-                terminalPanel={<TerminalPanel />}
-                previewPanel={<RightPanel />}
+                chatPanel={<ChatPanel projectId={projectId} initialPrompt={prompt} />}
+                terminalPanel={<TerminalPanel projectId={projectId} />}
+                previewPanel={<RightPanel projectId={projectId} />}
             />
         </main>
     );

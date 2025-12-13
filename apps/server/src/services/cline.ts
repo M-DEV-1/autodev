@@ -1,7 +1,10 @@
-
 import { spawn, ChildProcess } from 'child_process';
 import { Server } from 'socket.io';
 import { WorkspaceService } from './workspace';
+import { RunLimiter } from './runLimiter';
+import { Project } from '../models/Project';
+import fs from 'fs/promises';
+import path from 'path';
 
 interface RunningProcess {
     process: ChildProcess;
@@ -11,56 +14,139 @@ interface RunningProcess {
 export class ClineService {
     private static processes: Map<string, RunningProcess> = new Map();
 
-    static async run(projectId: string, prompt: string, io: Server) {
-        // 1. Get workspace
-        const workspacePath = await WorkspaceService.create(projectId);
-
-        // 2. Kill existing process for this project if any
-        if (this.processes.has(projectId)) {
-            const existing = this.processes.get(projectId);
-            existing?.process.kill();
-            this.processes.delete(projectId);
+    static async run(project: any, io: Server) {
+        // 0. Execution Lock via RunLimiter
+        if (!RunLimiter.canRun()) {
+            throw new Error(`Agent is busy. Max concurrent runs reached.`);
         }
 
-        console.log(`[Cline] Starting process for project ${projectId} in ${workspacePath}`);
+        const { id: projectId, prompt } = project;
 
-        // 3. Spawn process (Mocking Cline with a shell script for now that mimics output)
-        // In real impl: 'npx', ['cline', 'run', '--prompt', prompt], { cwd: workspacePath }
-        const child = spawn('bash', ['-c', `
-            echo "Initializing Cliner..."
-            sleep 1
-            echo "Analyzing request: ${prompt}"
-            sleep 1
-            echo "Creating implementation plan..."
-            sleep 1
-            echo "Writing files to ${workspacePath}..."
-            sleep 1
-            echo "Done."
-        `], {
-            cwd: workspacePath,
-            stdio: ['ignore', 'pipe', 'pipe']
-        });
+        try {
+            RunLimiter.startRun();
 
-        this.processes.set(projectId, { process: child, projectId });
+            // 1. Get workspace (scaffolds structure if needed)
+            const rootPath = await WorkspaceService.create(projectId, prompt);
 
-        // 4. Stream logs
-        child.stdout?.on('data', (data) => {
-            const output = data.toString();
-            // Emit to specific room
-            io.to(`project:${projectId}`).emit('project:log', output);
-        });
+            // Use 'repo' subdirectory as valid CWD for the agent
+            const repoPath = WorkspaceService.getRepoPath(projectId);
 
-        child.stderr?.on('data', (data) => {
-            const output = data.toString();
-            io.to(`project:${projectId}`).emit('project:log', `\x1b[31m${output}\x1b[0m`); // Red for error
-        });
+            // Update meta.json
+            const metaPath = path.join(rootPath, 'meta.json');
+            // Read existing or create new partial
+            let meta: any = {};
+            try {
+                const content = await fs.readFile(metaPath, 'utf-8');
+                meta = JSON.parse(content);
+            } catch (e) { }
 
-        child.on('close', (code) => {
-            console.log(`[Cline] Process exited with code ${code}`);
-            io.to(`project:${projectId}`).emit('project:log', `\r\nProcess exited with code ${code}`);
+            meta.lastRun = new Date().toISOString();
+            meta.status = 'running';
+            await fs.writeFile(metaPath, JSON.stringify(meta, null, 2));
+
+            // System Prompt construction
+            const systemPrompt = `
+SYSTEM_NOTE: You are running in a restricted local environment.
+1. Plan your actions first.
+2. Execute step-by-step.
+3. Do not modify files outside this workspace.
+4. Usage of 'npm install' is allowed but prefer 'pnpm' if available.
+
+    USER_REQUEST:
+${prompt}
+`.trim();
+
+            console.log(`[Cline] Starting process for project ${projectId} in ${repoPath}`);
+
+            // 2. Kill existing process
+            if (this.processes.has(projectId)) {
+                this.processes.get(projectId)?.process.kill();
+                this.processes.delete(projectId);
+                RunLimiter.endRun(); // Re-balance as we are starting a new one
+                RunLimiter.startRun();
+            }
+
+            // 3. Spawn Cline Process
+            const hardenedEnv = {
+                ...process.env,
+                PATH: `${process.env.PATH}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${process.env.HOME}/.npm-global/bin`
+            };
+
+            const child = spawn('cline', ['--oneshot', '-y', systemPrompt], {
+                cwd: repoPath, // IMPORTANT: Run inside repo/
+                env: hardenedEnv,
+                stdio: ['ignore', 'pipe', 'pipe']
+            });
+
+            this.processes.set(projectId, { process: child, projectId });
+
+            // 4. Stream logs & Persistence
+            const handleLog = (data: Buffer | string, type: 'stdout' | 'stderr') => {
+                const message = data.toString();
+
+                // Structured Log Emission
+                io.to(`project:${projectId}`).emit('project:log', {
+                    type: type === 'stderr' ? 'error' : 'info',
+                    message: message,
+                    timestamp: new Date().toISOString()
+                });
+
+                // DB Persistence
+                Project.findByIdAndUpdate(projectId, {
+                    $push: { logs: message },
+                    status: 'running'
+                }).exec().catch(err => console.error("Log save error:", err));
+            };
+
+            child.stdout?.on('data', (d) => handleLog(d, 'stdout'));
+            child.stderr?.on('data', (d) => handleLog(d, 'stderr'));
+
+            child.on('error', (err) => {
+                console.error(`[Cline] Failed to start process:`, err);
+                io.to(`project:${projectId}`).emit('project:log', {
+                    type: 'error',
+                    message: `\x1b[31mFailed to start Cline: ${err.message}\x1b[0m`,
+                    timestamp: new Date().toISOString()
+                });
+                this.cleanup(projectId, rootPath, 'failed');
+            });
+
+            child.on('close', (code) => {
+                console.log(`[Cline] Process exited with code ${code}`);
+                io.to(`project:${projectId}`).emit('project:log', {
+                    type: 'system',
+                    message: `\r\nProcess exited with code ${code}`,
+                    timestamp: new Date().toISOString()
+                });
+                this.cleanup(projectId, rootPath, code === 0 ? 'completed' : 'failed');
+            });
+
+            return { success: true, pid: child.pid };
+        } catch (error) {
+            RunLimiter.endRun();
+            throw error;
+        }
+    }
+
+    private static async cleanup(projectId: string, rootPath: string, status: string) {
+        if (this.processes.has(projectId)) {
             this.processes.delete(projectId);
-        });
+            RunLimiter.endRun();
+        }
 
-        return { success: true, pid: child.pid };
+        // Update meta.json
+        try {
+            const metaPath = path.join(rootPath, 'meta.json');
+            const content = await fs.readFile(metaPath, 'utf-8');
+            const meta = JSON.parse(content);
+            meta.status = status;
+            meta.finishedAt = new Date().toISOString();
+            await fs.writeFile(metaPath, JSON.stringify(meta, null, 2));
+
+            // Update DB Status
+            await Project.findByIdAndUpdate(projectId, { status: status });
+        } catch (e) {
+            console.error("Cleanup error:", e);
+        }
     }
 }

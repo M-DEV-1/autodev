@@ -6,7 +6,11 @@ import { FileSystemPanel } from "./FileSystemPanel";
 import { cn } from "@/lib/utils";
 import { Copy, Eye, Laptop } from "lucide-react";
 
-export function RightPanel() {
+interface RightPanelProps {
+    projectId: string;
+}
+
+export function RightPanel({ projectId }: RightPanelProps) {
     const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview');
 
     return (
@@ -48,7 +52,7 @@ export function RightPanel() {
 
             {/* Content Area */}
             <div className="flex-1 min-h-0 relative">
-                {activeTab === 'preview' ? <PreviewPanel /> : <FileSystemPanel />}
+                {activeTab === 'preview' ? <PreviewPanel /> : <FileSystemPanel projectId={projectId} />}
             </div>
         </div>
     );

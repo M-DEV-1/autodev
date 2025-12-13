@@ -10,10 +10,11 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef, useCallback } from "react";
 
 interface ChatPanelProps {
+    projectId: string;
     initialPrompt?: string;
 }
 
-export function ChatPanel({ initialPrompt }: ChatPanelProps) {
+export function ChatPanel({ projectId, initialPrompt }: ChatPanelProps) {
     const [messages, setMessages] = useState<{ role: 'user' | 'agent', content: string }[]>([]);
     const [input, setInput] = useState("");
     const hasStartedRef = useRef(false);
@@ -29,11 +30,11 @@ export function ChatPanel({ initialPrompt }: ChatPanelProps) {
         }
 
         try {
-            const response = await fetch('http://localhost:4000/api/run', {
+            const response = await fetch('http://localhost:3002/api/run', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    projectId: 'default-project', // Hardcoded for now, should come from URL/Context
+                    projectId: projectId,
                     prompt: text
                 })
             });

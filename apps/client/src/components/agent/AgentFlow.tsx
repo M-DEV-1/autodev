@@ -13,11 +13,29 @@ interface AgentFlowProps {
 export function AgentFlow({ onClose, initialMode = 'new' }: AgentFlowProps) {
     const router = useRouter();
 
-    const handleStartProject = (prompt: string) => {
-        // In the future, create project via API first to get real ID
-        const projectId = 'default-project';
-        const encodedPrompt = encodeURIComponent(prompt);
-        router.push(`/project/${projectId}?prompt=${encodedPrompt}`);
+    const handleStartProject = async (prompt: string) => {
+        try {
+            const response = await fetch('http://localhost:3002/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: "New Project", // Could prompt for name later
+                    prompt
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const projectId = data.project._id;
+                const encodedPrompt = encodeURIComponent(prompt);
+                router.push(`/project/${projectId}?prompt=${encodedPrompt}`);
+            } else {
+                console.error("Failed to create project");
+                // Fallback or error state
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     return (
