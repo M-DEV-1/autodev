@@ -9,18 +9,24 @@ import { AgentService } from './services/agent';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// CORS configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS;
+
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
+
 app.use(express.json());
 
 const httpServer = createServer(app);
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['http://localhost:3000'];
 
 const io = new Server(httpServer, {
     cors: {
         origin: allowedOrigins,
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
@@ -28,6 +34,7 @@ const io = new Server(httpServer, {
 const ptyService = new PtyService();
 const agentService = new AgentService();
 
+// Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
 
@@ -48,6 +55,7 @@ io.on('connection', (socket) => {
     });
 });
 
+// Agent Planning Route
 app.post('/api/plan', async (req, res) => {
     const { prompt } = req.body;
     try {
@@ -59,11 +67,12 @@ app.post('/api/plan', async (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', service: 'apps/api' });
+    res.json({ status: 'ok', service: 'AutoDev API' });
 });
 
 const PORT = process.env.PORT || 3001;
 
 httpServer.listen(PORT, () => {
-    console.log(`API Server running on port ${PORT}`);
+    console.log(`✅ AutoDev API Server running on port ${PORT}`);
+    console.log(`📍 Health check: http://localhost:${PORT}/health`);
 });
