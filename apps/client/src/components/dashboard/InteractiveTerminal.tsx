@@ -48,6 +48,25 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
         }
     }, [mode, step, loading]);
 
+    const handleSubmit = async () => {
+        const cmd = inputBuffer.trim();
+        if (!cmd) return;
+
+        // Handle Back command
+        if (cmd.toLowerCase().startsWith('back') || cmd.toLowerCase() === 'exit') {
+            setMode('menu');
+            setStep('mode_select');
+            setInputBuffer("");
+            return;
+        }
+
+        if (step === 'scratch_prompt') {
+            await handleProjectCreate("New Project", cmd);
+        } else if (step === 'git_url') {
+            await handleProjectCreate("Git Project", `Clone repo: ${cmd}`);
+        }
+    };
+
     const handleProjectCreate = async (name: string, prompt: string) => {
         setLoading(true);
         try {
@@ -63,31 +82,28 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
             if (!response.ok) throw new Error('Failed to create project');
 
             const data = await response.json();
-            router.push(`/project/${data.project.id}`);
+            const projectId = data.project._id;
+
+            // Pass the prompt as a query param so the ChatPanel can pick it up immediately
+            router.push(`/project/${projectId}?prompt=${encodeURIComponent(prompt)}`);
         } catch (error) {
             console.error(error);
             setLoading(false);
-            // Show error in "terminal" history ideally
         }
     };
 
-    const handleCommand = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const cmd = inputBuffer.trim();
-        if (!cmd) return;
-
-        setInputBuffer("");
-
-        if (cmd.toLowerCase() === 'back' || cmd.toLowerCase() === 'exit') {
-            setMode('menu');
-            setStep('mode_select');
-            return;
-        }
-
-        if (step === 'scratch_prompt') {
-            await handleProjectCreate("New Project", cmd);
-        } else if (step === 'git_url') {
-            await handleProjectCreate("Git Project", `Clone repo: ${cmd}`);
+    const handleKeyDownInput = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            // Explicitly handle 'back' here to ensure it's caught before any other logic
+            const val = (e.target as HTMLTextAreaElement).value.trim().toLowerCase();
+            if (val === 'back' || val === 'exit') {
+                setMode('menu');
+                setStep('mode_select');
+                setInputBuffer("");
+                return;
+            }
+            handleSubmit();
         }
     };
 
@@ -144,20 +160,41 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [handleKeyDown]);
 
+    // Auto-resize textarea
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.style.height = 'auto';
+            inputRef.current.style.height = inputRef.current.scrollHeight + 'px';
+        }
+    }, [inputBuffer, mode]);
+
     return (
         <div className="w-full max-w-4xl mx-auto mb-16 transition-all duration-500 ease-in-out" onClick={() => inputRef.current?.focus()}>
-            <GlassBox className="min-h-[400px] bg-[#0A0A0B]/90 shadow-2xl shadow-indigo-500/10 transition-all duration-300 flex flex-col cursor-text">
+            {/* Unified Terminal Container (Replaces GlassBox) */}
+            <div className="
+                relative z-10
+                bg-[#0A0A0B]/80 backdrop-blur-3xl
+                border border-white/10
+                rounded-xl overflow-hidden
+                shadow-2xl shadow-indigo-500/10
+                transition-all duration-300
+                flex flex-col
+                min-h-[400px] max-h-[600px]
+                cursor-text
+                group
+            ">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 pointer-events-none" />
 
                 {/* Header */}
-                <div className="h-9 border-b border-white/5 flex items-center justify-between px-4 bg-white/[0.02]">
+                <div className="h-10 border-b border-white/5 flex items-center justify-between px-4 bg-white/[0.02] shrink-0 select-none relative z-10">
                     <div className="flex items-center gap-2">
                         <div className="flex gap-1.5">
                             <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
                             <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
                             <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
                         </div>
-                        <div className="ml-3 flex items-center gap-2 text-[10px] font-mono text-slate-500">
-                            <span className="text-slate-600">autodev</span>
+                        <div className="ml-3 flex items-center gap-2 text-[11px] font-mono text-slate-400">
+                            <span className="text-slate-500">autodev</span>
                             <span>/</span>
                             <span className="text-blue-400">
                                 {mode === 'menu' ? 'dashboard' : step === 'scratch_prompt' ? 'new-project' : 'git-clone'}
@@ -172,15 +209,20 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-6 relative font-mono text-sm">
+                <div className="flex-1 p-6 relative font-mono text-sm overflow-y-auto no-scrollbar">
                     {mode === 'menu' ? (
                         /* Menu Mode */
                         <div className="animate-in fade-in duration-300">
-                            <div className="flex items-center gap-2 mb-8 text-slate-300">
+                            <div className="flex items-center gap-2 mb-8 text-slate-200 font-medium">
                                 <span className="text-green-500">➜</span>
                                 <span className="text-blue-400">~</span>
-                                <span className="text-slate-400">autodev init</span>
-                                {isTyping && <span className="w-2 h-4 bg-slate-500 animate-pulse ml-1" />}
+                                <span className="text-slate-200">autodev init</span>
+                            </div>
+
+                            <div className="mb-6 text-slate-300 h-6 flex items-center shadow-lg">
+                                <span className="text-green-500 mr-2">➜</span>
+                                <span className="text-white">{typedText}</span>
+                                {isTyping && <span className="w-2 h-4 bg-slate-400 animate-pulse ml-1 inline-block" />}
                             </div>
 
                             <div className="space-y-3">
@@ -194,12 +236,19 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
                                             className={cn(
                                                 "group relative flex items-center gap-4 p-4 rounded-xl transition-all cursor-pointer border",
                                                 isSelected
-                                                    ? "bg-white/[0.08] border-white/10"
+                                                    ? "bg-white/[0.08] border-white/10 shadow-lg"
                                                     : "border-transparent hover:bg-white/[0.02]",
                                                 option.disabled && "opacity-50 cursor-not-allowed"
                                             )}
                                         >
-                                            <div className="flex items-center gap-4 w-full">
+                                            {/* Active Indicator Arrow */}
+                                            {isSelected && (
+                                                <div className="absolute left-2 text-blue-400 font-mono text-lg animate-pulse">
+                                                    ›
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-center gap-4 w-full pl-4">
                                                 <div className={cn(
                                                     "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
                                                     isSelected ? "bg-blue-500/20 text-blue-400" : "bg-white/5 text-slate-500"
@@ -208,15 +257,20 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
                                                 </div>
                                                 <div className="flex-1 flex flex-col gap-0.5 font-sans">
                                                     <span className={cn(
-                                                        "font-medium transition-colors",
+                                                        "font-medium transition-colors font-mono",
                                                         isSelected ? "text-white" : "text-slate-400"
                                                     )}>{option.label}</span>
-                                                    <span className="text-xs text-slate-500">
+                                                    <span className="text-xs text-slate-500 font-mono">
                                                         {option.description}
                                                     </span>
                                                 </div>
                                                 {isSelected && (
-                                                    <span className="text-blue-400 text-[10px] hidden sm:inline">ENTER</span>
+                                                    <div className="flex items-center gap-2 text-slate-500">
+                                                        <span className="text-[10px]">Press</span>
+                                                        <kbd className="h-5 px-1.5 flex items-center justify-center rounded bg-white/10 text-[10px] font-mono text-slate-300 border border-white/10">
+                                                            Enter
+                                                        </kbd>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
@@ -225,10 +279,9 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
                             </div>
                         </div>
                     ) : (
-                        /* Wizard Mode (Same Component) */
-                        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full flex flex-col">
-                            {/* Command History / Context */}
-                            <div className="text-slate-500 mb-4">
+                        /* Wizard Mode */
+                        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 min-h-full flex flex-col">
+                            <div className="text-slate-400 mb-4 shrink-0">
                                 <div className="flex gap-2">
                                     <span className="text-green-500">➜</span>
                                     <span className="text-blue-400">~</span>
@@ -239,32 +292,32 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
                                 </div>
                             </div>
 
-                            {/* Prompt */}
                             <div className="flex-1 flex flex-col">
-                                <div className="text-slate-300 mb-2">
+                                <div className="text-slate-200 mb-2 shrink-0">
                                     {step === 'scratch_prompt'
-                                        ? "Describe what you want to build (e.g. &apos;A generic SaaS landing page&apos;):"
+                                        ? "Describe what you want to build (e.g. 'A generic SaaS landing page'):"
                                         : "Enter the Git repository URL:"}
                                 </div>
 
-                                <form onSubmit={handleCommand} className="flex items-center gap-2 text-blue-400">
-                                    <span className="text-green-500">?</span>
-                                    <span className="font-bold">
+                                <div className="flex items-start gap-2 text-blue-400 w-full">
+                                    <span className="text-green-500 mt-1">?</span>
+                                    <span className="font-bold shrink-0 mt-1">
                                         {step === 'scratch_prompt' ? "Idea" : "URL"}
                                         <span className="text-slate-600 ml-1">›</span>
                                     </span>
-                                    <input
-                                        ref={inputRef}
-                                        type="text"
+                                    <textarea
+                                        ref={inputRef as any}
                                         value={loading ? "Creating project..." : inputBuffer}
                                         onChange={(e) => setInputBuffer(e.target.value)}
+                                        onKeyDown={handleKeyDownInput}
                                         disabled={loading}
-                                        className="flex-1 bg-transparent border-none outline-none text-slate-200 placeholder-slate-600"
+                                        rows={1}
+                                        className="flex-1 bg-transparent border-none outline-none text-white placeholder-slate-600 resize-none overflow-hidden min-h-[24px]"
                                         placeholder={step === 'scratch_prompt' ? "Type your prompt..." : "https://github.com/..."}
                                         autoFocus
                                     />
-                                    {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
-                                </form>
+                                    {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-500 shrink-0 mt-1" />}
+                                </div>
 
                                 {/* Chips */}
                                 {!loading && step === 'scratch_prompt' && (
@@ -278,7 +331,7 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
                                                 key={chip}
                                                 type="button"
                                                 onClick={() => setInputBuffer(chip)}
-                                                className="px-3 py-1.5 text-xs bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-slate-400 hover:text-white transition-colors"
+                                                className="px-3 py-1.5 text-xs bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-slate-300 hover:text-white transition-colors"
                                             >
                                                 {chip}
                                             </button>
@@ -293,7 +346,7 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
                     <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full pointer-events-none opacity-50" />
                     <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full pointer-events-none opacity-50" />
                 </div>
-            </GlassBox>
+            </div>
 
             {/* Hint Footer */}
             <div className="mt-6 flex justify-center gap-8 text-[10px] text-slate-600 font-mono animate-in fade-in opacity-50">

@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/models/Project.ts","./src/services/agent.ts","./src/services/cline.ts","./src/services/runLimiter.ts","./src/services/workspace.ts"],"version":"5.9.2"}
