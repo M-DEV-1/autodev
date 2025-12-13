@@ -12,7 +12,8 @@ export function GlassBox({ children, className }: { children?: React.ReactNode, 
         shadow-2xl shadow-black/50
         transition-all duration-300
         hover:border-white/20
-        min-h-[500px] flex flex-col
+        hover:border-white/20
+        flex flex-col h-full
       ">
                 <div className="h-10 bg-white/5 border-b border-white/10 flex items-center justify-between px-4 select-none">
                     <div className="flex items-center gap-2">

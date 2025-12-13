@@ -1,6 +1,14 @@
 {
     "$schema": "https://turborepo.com/schema.json",
     "ui": "tui",
+    "globalEnv": [
+        "NEXTAUTH_SECRET",
+        "ALLOWED_ORIGINS",
+        "MONGODB_URI",
+        "PORT",
+        "NODE_ENV",
+        "KESTRA_URL"
+    ],
     "tasks": {
         "build": {
             "dependsOn": [
@@ -12,7 +20,8 @@
             ],
             "outputs": [
                 ".next/**",
-                "!.next/cache/**"
+                "!.next/cache/**",
+                "dist/**"
             ]
         },
         "lint": {

@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Header } from '@/components/layout/Header';
+import AuthProvider from '@/components/providers/AuthProvider';
 import { cn } from '@/lib/utils';
+import { Header } from '@/components/layout/Header';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
     title: 'AutoDev',
-    description: 'Autonomous Prompt to Production',
+    description: 'Coordinate planning, coding, and deployment with a single prompt.',
     icons: {
         icon: '/favicon.svg',
     },
@@ -22,10 +23,12 @@ export default function RootLayout({
     return (
         <html lang="en" className="dark">
             <body className={cn(inter.className, "bg-background text-foreground antialiased selection:bg-orange-500/30")}>
-                <Header />
-                <main className="min-h-screen">
-                    {children}
-                </main>
+                <AuthProvider>
+                    <Header />
+                    <main className="min-h-screen">
+                        {children}
+                    </main>
+                </AuthProvider>
             </body>
         </html>
     );
