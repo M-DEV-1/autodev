@@ -18,74 +18,7 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
-  apps/api:
-    dependencies:
-      '@octokit/rest':
-        specifier: ^20.0.2
-        version: 20.1.2
-      axios:
-        specifier: ^1.6.2
-        version: 1.13.2
-      cors:
-        specifier: ^2.8.5
-        version: 2.8.5
-      dotenv:
-        specifier: ^16.3.1
-        version: 16.6.1
-      express:
-        specifier: ^4.18.2
-        version: 4.22.1
-      express-session:
-        specifier: ^1.18.2
-        version: 1.18.2
-      mongoose:
-        specifier: ^9.0.1
-        version: 9.0.1
-      node-pty:
-        specifier: ^1.0.0
-        version: 1.0.0
-      simple-git:
-        specifier: ^3.21.0
-        version: 3.30.0
-      socket.io:
-        specifier: ^4.7.2
-        version: 4.8.1
-      uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
-    devDependencies:
-      '@types/cors':
-        specifier: ^2.8.17
-        version: 2.8.19
-      '@types/express':
-        specifier: ^4.17.21
-        version: 4.17.25
-      '@types/express-session':
-        specifier: ^1.17.10
-        version: 1.18.2
-      '@types/mongoose':
-        specifier: ^5.11.97
-        version: 5.11.97
-      '@types/node':
-        specifier: ^20.10.4
-        version: 20.19.26
-      '@types/uuid':
-        specifier: ^9.0.7
-        version: 9.0.8
-      nodemon:
-        specifier: ^3.0.2
-        version: 3.1.11
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@types/node@20.19.26)(typescript@5.9.2)
-      tsx:
-        specifier: ^4.21.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.2
-
-  apps/web:
+  apps/client:
     dependencies:
       '@octokit/rest':
         specifier: ^20.0.2
@@ -180,6 +113,73 @@ importers:
         version: 3.4.19(tsx@4.21.0)
       typescript:
         specifier: ^5.3.3
+        version: 5.9.2
+
+  apps/server:
+    dependencies:
+      '@octokit/rest':
+        specifier: ^20.0.2
+        version: 20.1.2
+      axios:
+        specifier: ^1.6.2
+        version: 1.13.2
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.6.1
+      express:
+        specifier: ^4.18.2
+        version: 4.22.1
+      express-session:
+        specifier: ^1.18.2
+        version: 1.18.2
+      mongoose:
+        specifier: ^9.0.1
+        version: 9.0.1
+      node-pty:
+        specifier: ^1.0.0
+        version: 1.0.0
+      simple-git:
+        specifier: ^3.21.0
+        version: 3.30.0
+      socket.io:
+        specifier: ^4.7.2
+        version: 4.8.1
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
+    devDependencies:
+      '@types/cors':
+        specifier: ^2.8.17
+        version: 2.8.19
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.25
+      '@types/express-session':
+        specifier: ^1.17.10
+        version: 1.18.2
+      '@types/mongoose':
+        specifier: ^5.11.97
+        version: 5.11.97
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.19.26
+      '@types/uuid':
+        specifier: ^9.0.7
+        version: 9.0.8
+      nodemon:
+        specifier: ^3.0.2
+        version: 3.1.11
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@20.19.26)(typescript@5.9.2)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.2
         version: 5.9.2
 
 packages:

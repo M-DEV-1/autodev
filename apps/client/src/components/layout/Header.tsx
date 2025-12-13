@@ -61,7 +61,7 @@ export function Header() {
         <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
             <div className="rounded-full border border-white/10 bg-black/50 backdrop-blur-xl shadow-2xl shadow-black/50 px-4 md:px-6 h-14 flex items-center justify-between supports-[backdrop-filter]:bg-black/20">
 
-                <Link href={isLoggedIn ? "/dashboard" : "/"} className="flex items-center gap-2">
+                <Link href={"/"} className="flex items-center gap-2">
                     <Image
                         src="/logo.svg"
                         alt="AutoDev"
