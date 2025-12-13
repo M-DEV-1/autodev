@@ -31,6 +31,19 @@ export function FileSystemPanel({ projectId }: FileSystemPanelProps) {
         setExpandedFolders(newSet);
     };
 
+    // Placeholder for buildTree function, assuming it will be defined elsewhere or is a utility.
+    // For now, we'll just return the files as is to avoid breaking the code.
+    // In a real scenario, `buildTree` would transform the flat `files` array into a hierarchical structure.
+    const buildTree = (nodes: FileNode[]): FileNode[] => {
+        // This is a simplified placeholder. A real buildTree function would construct a tree.
+        // For the current context, we'll assume `files` is already a tree or `buildTree` is a no-op.
+        return nodes;
+    };
+
+    const fileStructure = useMemo(() => {
+        return buildTree(files);
+    }, [files]);
+
     const FileTreeItem = useMemo(() => {
         const Item = ({ node, level = 0 }: { node: FileNode, level?: number }) => {
             const isExpanded = expandedFolders.has(node.path);

@@ -149,4 +149,18 @@ ${prompt}
             console.error("Cleanup error:", e);
         }
     }
+
+    static killAll() {
+        console.log(`[Cline] Killing ${this.processes.size} active processes...`);
+        for (const [projectId, { process, projectId: pid }] of this.processes.entries()) {
+            try {
+                process.kill();
+                console.log(`[Cline] Killed process for project ${pid}`);
+            } catch (e) {
+                console.error(`[Cline] Failed to kill process ${pid}:`, e);
+            }
+        }
+        this.processes.clear();
+        RunLimiter.reset(); // custom reset if needed, or just let node exit
+    }
 }

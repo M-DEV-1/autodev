@@ -3,11 +3,11 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
-import { ClineService } from "./services/cline";
-import { WorkspaceService } from "./services/workspace";
-
+import { Project } from './models/Project';
+import { WorkspaceService } from './services/workspace';
+import { ClineService } from './services/cline';
+import fs from 'fs';
 import mongoose from "mongoose";
-import { Project } from "./models/Project";
 
 dotenv.config();
 
@@ -150,3 +150,21 @@ httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`📍 Health check: http://${process.env.NEXT_PUBLIC_API_URL}:${PORT}/health`);
 });
+
+// Graceful Shutdown
+const handleShutdown = (signal: string) => {
+    console.log(`\n${signal} received. Shutting down...`);
+    ClineService.killAll();
+    httpServer.close(() => {
+        console.log('HTTP server closed');
+        // Close MongoDB connection if needed
+        // mongoose.connection.close(false, () => {
+        //     console.log('MongoDB connection closed');
+        //     process.exit(0);
+        // });
+        process.exit(0);
+    });
+};
+
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+process.on('SIGINT', () => handleShutdown('SIGINT'));
