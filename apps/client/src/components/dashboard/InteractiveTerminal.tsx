@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Plus, Github, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { GlassBox } from "@/components/terminal/GlassBox";
+
 
 
 
@@ -173,7 +173,7 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
             {/* Unified Terminal Container (Replaces GlassBox) */}
             <div className="
                 relative z-10
-                bg-[#0A0A0B]/80 backdrop-blur-3xl
+                bg-black/95 backdrop-blur-3xl
                 border border-white/10
                 rounded-xl overflow-hidden
                 shadow-2xl shadow-indigo-500/10

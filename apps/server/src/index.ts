@@ -1,3 +1,4 @@
+import path from "path";
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -139,16 +140,48 @@ app.get("/api/projects/:projectId/files", async (req, res) => {
     }
 });
 
+// Preview Route (Static File Serving)
+app.get("/preview/:projectId/*", (req, res) => {
+    const { projectId } = req.params;
+    const unsafePath = (req as any).params[0] || "index.html";
+
+    // Basic security: prevent directory traversal
+    if (unsafePath.includes("..")) {
+        return res.status(403).send("Access Denied");
+    }
+
+    const homeDir = process.env.HOME || process.env.USERPROFILE || "";
+    // Note: aligning with WorkspaceService base path
+    const workspaceRoot = process.env.WORKSPACE_ROOT
+        ? path.join(process.env.WORKSPACE_ROOT, projectId)
+        : path.join(homeDir, ".autodev", "workspaces", projectId);
+
+    const filePath = path.join(workspaceRoot, unsafePath);
+
+    // Ensure we are sending an actual file if it exists, otherwise 404
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        // Fallback for SPA routing or incomplete paths? For V1 static, just 404 or try index.html if is root
+        if (!(req as any).params[0] || (req as any).params[0] === "/") {
+            const index = path.join(workspaceRoot, "index.html");
+            if (fs.existsSync(index)) return res.sendFile(index);
+        }
+        res.status(404).send(`File not found: ${unsafePath}`);
+    }
+});
+
 // Health check
 app.get("/health", (req, res) => {
     res.json({ status: "ok" });
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
 httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log(`📍 Health check: http://${process.env.NEXT_PUBLIC_API_URL}:${PORT}/health`);
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || `http://localhost:${PORT}`;
+    console.log(`📍 Health check: ${baseUrl}/health`);
 });
 
 // Graceful Shutdown

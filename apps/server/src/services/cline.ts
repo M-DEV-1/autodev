@@ -58,6 +58,13 @@ ${prompt}
 
             console.log(`[Cline] Starting process for project ${projectId} in ${repoPath}`);
 
+            // Emit Model Info Log (User Request)
+            io.to(`project:${projectId}`).emit('project:log', {
+                type: 'info',
+                message: `Using Model: ${project.model || 'Unknown Model'}`,
+                timestamp: new Date().toISOString()
+            });
+
             // 2. Kill existing process
             if (this.processes.has(projectId)) {
                 this.processes.get(projectId)?.process.kill();

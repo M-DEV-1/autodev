@@ -52,7 +52,7 @@ export function RightPanel({ projectId }: RightPanelProps) {
 
             {/* Content Area */}
             <div className="flex-1 min-h-0 relative">
-                {activeTab === 'preview' ? <PreviewPanel /> : <FileSystemPanel projectId={projectId} />}
+                {activeTab === 'preview' ? <PreviewPanel projectId={projectId} /> : <FileSystemPanel projectId={projectId} />}
             </div>
         </div>
     );
