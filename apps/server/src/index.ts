@@ -22,15 +22,16 @@ const app = express();
 
 // Try to load certificates
 let httpServer: any;
-try {
-    const key = fs.readFileSync(path.join(__dirname, '../certs/server.key'));
-    const cert = fs.readFileSync(path.join(__dirname, '../certs/server.crt'));
-    httpServer = createHttpsServer({ key, cert }, app);
-    console.log("🔒 Starting in HTTPS mode");
-} catch (e) {
-    console.log("⚠️ Certificates not found, falling back to HTTP");
-    httpServer = createHttpServer(app);
-}
+// try {
+//     const key = fs.readFileSync(path.join(__dirname, '../certs/server.key'));
+//     const cert = fs.readFileSync(path.join(__dirname, '../certs/server.crt'));
+//     httpServer = createHttpsServer({ key, cert }, app);
+//     console.log("🔒 Starting in HTTPS mode");
+// } catch (e) {
+//     console.log("⚠️ Certificates not found, falling back to HTTP");
+httpServer = createHttpServer(app);
+console.log("🔓 Starting in HTTP mode");
+// }
 
 // Configure CORS for both Express and Socket.IO
 const allowedOrigins = [
