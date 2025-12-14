@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { File, Folder, Search, ChevronRight, ChevronDown, X } from "lucide-react";
+import { File, Folder, Search, ChevronRight, ChevronDown, X, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProjectStore, FileNode } from "@/store/project";
 
@@ -89,7 +89,16 @@ export function FileSystemPanel({ projectId }: FileSystemPanelProps) {
             <div className="w-64 border-r border-white/5 flex flex-col bg-[#050505]">
                 <div className="h-10 flex items-center justify-between px-3 border-b border-white/5 shrink-0 bg-black/20">
                     <span className="font-medium text-slate-400">Files</span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                        <a
+                            href={`/api/proxy/projects/${projectId}/download`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-slate-600 hover:text-slate-400"
+                            title="Download Source"
+                        >
+                            <Download className="w-3.5 h-3.5" />
+                        </a>
                         <Search className="w-3.5 h-3.5 text-slate-600 cursor-pointer hover:text-slate-400" />
                         <span className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => {
                             // Refresh
