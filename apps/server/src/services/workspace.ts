@@ -91,16 +91,25 @@ ${prompt}
                 } else {
                     // Start with simple text check or limit size
                     // For now, read all (safe for small hackathon projects)
-                    let content = '';
-                    try {
-                        content = await fs.readFile(fullPath, 'utf-8');
-                    } catch (e) { content = '[Binary or Unreadable]'; }
+                    const stats = await fs.stat(fullPath);
+                    if (stats.size > 100 * 1024) { // 100KB limit
+                        files.push({
+                            path: relPath,
+                            type: 'file',
+                            content: '[Large File - Content Hidden]'
+                        });
+                    } else {
+                        let content = '';
+                        try {
+                            content = await fs.readFile(fullPath, 'utf-8');
+                        } catch (e) { content = '[Binary or Unreadable]'; }
 
-                    files.push({
-                        path: relPath,
-                        type: 'file',
-                        content: content
-                    });
+                        files.push({
+                            path: relPath,
+                            type: 'file',
+                            content: content
+                        });
+                    }
                 }
             }
         }
