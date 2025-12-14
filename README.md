@@ -18,8 +18,24 @@
   <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto; color: #a1a1aa;">
     <b>AutoDev</b> is an autonomous software engineering agent. It plans architectures, manages file systems, runs terminal commands, and deploys full-stack applications.
   </p>
-  <br/>
+  <p>
+    Video Link: <a href="">youtube.com</a>
+  </p>
 </div>
+
+## Architecture & Workflow
+
+### System Architecture + Flow
+<div align="center"> 
+  <img width="1647" height="715" alt="image" src="https://github.com/user-attachments/assets/3226a472-f6c8-42ce-86d6-3e7e639f2867" />
+</div>
+
+
+### Vercel & CodeRabbit Usage
+<div align="center"> 
+  <img width="753" height="540" alt="image" src="https://github.com/user-attachments/assets/14517547-52cf-41e2-80e9-eccfa1275042" />
+</div>
+
 
 ## The Stack
 
