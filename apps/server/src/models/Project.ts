@@ -17,6 +17,7 @@ const ProjectSchema: Schema = new Schema({
     name: { type: String, required: true },
     description: { type: String },
     prompt: { type: String },
+    githubUrl: { type: String },
     status: {
         type: String,
         enum: ['idle', 'running', 'completed', 'error'],

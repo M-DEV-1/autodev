@@ -74,8 +74,7 @@ export default function XTermComponent({ projectId }: XTermComponentProps) {
     useEffect(() => {
         if (!xtermRef.current) return;
 
-        const API_URL = process.env.NEXT_PUBLIC_API_URL;
-        fetch(`${API_URL}/api/projects/${projectId}`)
+        fetch(`/api/proxy/projects/${projectId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.project && data.project.logs) {

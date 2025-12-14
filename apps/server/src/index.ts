@@ -99,11 +99,12 @@ app.get("/api/projects/:projectId", async (req, res) => {
 
 app.post("/api/projects", async (req, res) => {
     try {
-        const { name, description, prompt } = req.body;
+        const { name, description, prompt, githubUrl } = req.body;
         const project = new Project({
             name: name || "New Project",
             description,
             prompt,
+            githubUrl,
             status: 'idle'
         });
         await project.save();

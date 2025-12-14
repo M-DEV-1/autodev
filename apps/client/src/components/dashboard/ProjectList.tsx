@@ -22,7 +22,7 @@ export function ProjectList() {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const res = await fetch('/api/projects');
+                const res = await fetch('/api/proxy/projects');
                 const data = await res.json();
                 if (data.projects) {
                     setProjects(data.projects);

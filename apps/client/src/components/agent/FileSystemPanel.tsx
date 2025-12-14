@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { File, Folder, Search, ChevronRight, ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProjectStore, FileNode } from "@/store/project";
@@ -21,15 +21,17 @@ export function FileSystemPanel({ projectId }: FileSystemPanelProps) {
         fetchFiles(projectId).finally(() => setLoading(false));
     }, [projectId, fetchFiles]);
 
-    const toggleFolder = (path: string) => {
-        const newSet = new Set(expandedFolders);
-        if (newSet.has(path)) {
-            newSet.delete(path);
-        } else {
-            newSet.add(path);
-        }
-        setExpandedFolders(newSet);
-    };
+    const toggleFolder = useCallback((path: string) => {
+        setExpandedFolders(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(path)) {
+                newSet.delete(path);
+            } else {
+                newSet.add(path);
+            }
+            return newSet;
+        });
+    }, []);
 
     // Placeholder for buildTree function, assuming it will be defined elsewhere or is a utility.
     // For now, we'll just return the files as is to avoid breaking the code.
@@ -80,7 +82,7 @@ export function FileSystemPanel({ projectId }: FileSystemPanelProps) {
             );
         };
         return Item;
-    }, [expandedFolders, activeFile, setActiveFile]);
+    }, [expandedFolders, activeFile, setActiveFile, toggleFolder]);
 
     return (
         <div className="h-full w-full flex bg-[#0F0F11] font-mono text-xs">

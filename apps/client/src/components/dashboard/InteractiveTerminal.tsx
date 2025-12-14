@@ -63,19 +63,20 @@ export function InteractiveTerminal({ isGuest }: InteractiveTerminalProps) {
         if (step === 'scratch_prompt') {
             await handleProjectCreate("New Project", cmd);
         } else if (step === 'git_url') {
-            await handleProjectCreate("Git Project", `Clone repo: ${cmd}`);
+            await handleProjectCreate("Git Project", `Clone the repository ${cmd} into the current directory (.). Do not create a subdirectory.`, cmd);
         }
     };
 
-    const handleProjectCreate = async (name: string, prompt: string) => {
+    const handleProjectCreate = async (name: string, prompt: string, githubUrl?: string) => {
         setLoading(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`, {
+            const response = await fetch('/api/proxy/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: name,
-                    prompt
+                    prompt,
+                    githubUrl
                 })
             });
 

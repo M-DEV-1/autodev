@@ -1,55 +1,117 @@
-
-import { useState, useRef } from "react";
-import { Loader2, RefreshCw, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Loader2, RefreshCw, ExternalLink, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PreviewPanelProps {
     projectId: string;
 }
 
-export function PreviewPanel({ projectId }: PreviewPanelProps) {
-    const [key, setKey] = useState(0); // For forcing refresh
-    const [isLoading, setIsLoading] = useState(true);
-    const iframeRef = useRef<HTMLIFrameElement>(null);
+type PreviewState = 'idle' | 'loading' | 'ready' | 'error';
 
-    const previewUrl = `${process.env.NEXT_PUBLIC_API_URL}/preview/${projectId}/index.html`;
+export function PreviewPanel({ projectId }: PreviewPanelProps) {
+    const [status, setStatus] = useState<PreviewState>('loading'); // Default to loading on mount
+    const [key, setKey] = useState(0); // For forcing refresh
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const pollInterval = useRef<NodeJS.Timeout>();
+    const timeoutTimer = useRef<NodeJS.Timeout>();
+
+    const previewUrl = `/api/proxy/preview/${projectId}/index.html`;
+
+    const stopPolling = () => {
+        if (pollInterval.current) clearInterval(pollInterval.current);
+        if (timeoutTimer.current) clearTimeout(timeoutTimer.current);
+    };
+
+    const startPolling = useCallback(() => {
+        stopPolling();
+        setStatus('loading');
+
+        // Timeout after 60s
+        timeoutTimer.current = setTimeout(() => {
+            stopPolling();
+            setStatus('error');
+        }, 60000);
+
+        // Poll every 2s
+        pollInterval.current = setInterval(async () => {
+            try {
+                // We use HEAD or GET to check if file exists
+                // Note: The proxy/backend must handle this route
+                const res = await fetch(previewUrl, {
+                    method: 'HEAD',
+                    cache: 'no-store'
+                });
+
+                if (res.ok) {
+                    stopPolling();
+                    setStatus('ready');
+                    setKey(prev => prev + 1); // Force iframe reload
+                }
+            } catch (e) {
+                // Ignore errors and keep polling
+            }
+        }, 2000);
+    }, [previewUrl]);
+
+    // Start polling on mount
+    useEffect(() => {
+        startPolling();
+        return () => stopPolling();
+    }, [projectId, startPolling]);
 
     const handleRefresh = () => {
-        setIsLoading(true);
-        setKey(prev => prev + 1);
+        startPolling();
     };
 
     return (
         <div className="h-full w-full flex flex-col bg-white relative">
             {/* Toolbar */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-3 z-20 border border-white/10 transition-opacity opacity-0 hover:opacity-100 duration-300">
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-3 z-20 border border-white/10 transition-opacity hover:opacity-100 opacity-0 duration-300">
                 <div className="text-[10px] font-mono opacity-70 truncate max-w-[200px]">
                     /preview/{projectId}
                 </div>
                 <div className="h-3 w-px bg-white/20" />
                 <button onClick={handleRefresh} className="hover:text-blue-400 transition-colors">
-                    <RefreshCw className="w-3 h-3" />
+                    <RefreshCw className={cn("w-3 h-3", status === 'loading' && "animate-spin")} />
                 </button>
                 <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
                     <ExternalLink className="w-3 h-3" />
                 </a>
             </div>
 
-            {/* Loading State Overlay */}
-            {isLoading && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-50/50 backdrop-blur-sm pointer-events-none">
-                    <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+            {/* States Overlay */}
+            {status === 'loading' && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-50/50 backdrop-blur-sm">
+                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-2" />
+                    <p className="text-sm font-medium text-slate-600 bg-white/80 px-3 py-1 rounded-full shadow-sm">
+                        Building your project...
+                    </p>
                 </div>
             )}
 
-            <iframe
-                key={key}
-                ref={iframeRef}
-                src={previewUrl}
-                className="w-full h-full border-none bg-white"
-                title="Preview"
-                onLoad={() => setIsLoading(false)}
-            />
+            {status === 'error' && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-50/80 backdrop-blur-sm">
+                    <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
+                    <p className="text-sm font-medium text-red-600 mb-4">Preview timed out</p>
+                    <button
+                        onClick={handleRefresh}
+                        className="px-4 py-2 bg-white text-sm font-medium rounded-md shadow-sm border hover:bg-gray-50"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            )}
+
+            {/* Iframe */}
+            {(status === 'ready' || status === 'loading') && (
+                <iframe
+                    key={key}
+                    ref={iframeRef}
+                    src={status === 'ready' ? previewUrl : 'about:blank'}
+                    className="w-full h-full border-none bg-white"
+                    title="Preview"
+                />
+            )}
         </div>
     );
 }

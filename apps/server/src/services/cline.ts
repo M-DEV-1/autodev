@@ -31,6 +31,15 @@ export class ClineService {
             // Use 'repo' subdirectory as valid CWD for the agent
             const repoPath = WorkspaceService.getRepoPath(projectId);
 
+            // Validation: Ensure repoPath exists
+            try {
+                await fs.access(repoPath);
+                console.log(`[Cline] Verified CWD exists: ${repoPath}`);
+            } catch (error) {
+                console.error(`[Cline] CWD missing: ${repoPath}. Re-creating...`);
+                await fs.mkdir(repoPath, { recursive: true });
+            }
+
             // Update meta.json
             const metaPath = path.join(rootPath, 'meta.json');
             // Read existing or create new partial
@@ -46,11 +55,12 @@ export class ClineService {
 
             // System Prompt construction
             const systemPrompt = `
-SYSTEM_NOTE: You are running in a restricted local environment.
-1. Plan your actions first.
-2. Execute step-by-step.
-3. Do not modify files outside this workspace.
-4. Usage of 'npm install' is allowed but prefer 'pnpm' if available.
+You must build projects using ONLY vanilla HTML, CSS, and JavaScript.
+You must always create an \`index.html\` file at the project root.
+All styles must go in \`styles.css\`.
+All logic must go in \`script.js\`.
+Do not use frameworks, bundlers, or package managers.
+The project must be runnable by opening \`index.html\` directly in a browser.
 
     USER_REQUEST:
 ${prompt}
@@ -85,11 +95,17 @@ ${prompt}
                 stdio: ['ignore', 'pipe', 'pipe']
             });
 
+            // Debug Spawn Events
+            child.on('spawn', () => {
+                console.log(`[Cline] Process spawned successfully (PID: ${child.pid})`);
+            });
+
             this.processes.set(projectId, { process: child, projectId });
 
             // 4. Stream logs & Persistence
             const handleLog = (data: Buffer | string, type: 'stdout' | 'stderr') => {
                 const message = data.toString();
+                // console.log(`[Cline][${type}] ${message.trim().substring(0, 100)}...`); // Local debug log
 
                 // Structured Log Emission
                 io.to(`project:${projectId}`).emit('project:log', {
