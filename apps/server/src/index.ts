@@ -213,8 +213,8 @@ app.get("/preview/:projectId/*", (req, res) => {
     const homeDir = process.env.HOME || process.env.USERPROFILE || "";
     // Note: aligning with WorkspaceService base path
     const workspaceRoot = process.env.WORKSPACE_ROOT
-        ? path.join(process.env.WORKSPACE_ROOT, projectId)
-        : path.join(homeDir, ".autodev", "workspaces", projectId);
+        ? path.join(process.env.WORKSPACE_ROOT, projectId, 'repo')
+        : path.join(homeDir, ".autodev", "workspaces", projectId, 'repo');
 
     const filePath = path.join(workspaceRoot, unsafePath);
 
