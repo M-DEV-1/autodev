@@ -19,7 +19,7 @@
     <b>AutoDev</b> is an autonomous software engineering agent. It plans architectures, manages file systems, runs terminal commands, and deploys full-stack applications.
   </p>
   <p>
-    Video Link: <a href="">youtube.com</a>
+    Video Link: <a href="https://youtu.be/65gfu8akZSk">youtu.be/65gfu8akZSk</a>
   </p>
 </div>
 
