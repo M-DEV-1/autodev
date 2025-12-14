@@ -49,7 +49,7 @@ export function ChatPanel({ projectId, initialPrompt }: ChatPanelProps) {
         }
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/run`, {
+            const response = await fetch('/api/proxy/run', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
