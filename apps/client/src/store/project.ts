@@ -43,7 +43,7 @@ interface ProjectState {
     clearLogs: () => void;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
     projectId: null,
@@ -104,7 +104,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
     fetchFiles: async (projectId: string) => {
         try {
-            const res = await fetch(`${API_URL}/api/projects/${projectId}/files`);
+            const res = await fetch(`/api/proxy/projects/${projectId}/files`);
             const data = await res.json();
             if (data.files) {
                 const tree = buildTree(data.files);

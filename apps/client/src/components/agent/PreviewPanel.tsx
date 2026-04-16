@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Loader2, RefreshCw, ExternalLink, AlertCircle } from "lucide-react";
+import { Loader2, RefreshCw, ExternalLink, AlertCircle, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
+import confetti from "canvas-confetti";
 
 interface PreviewPanelProps {
     projectId: string;
@@ -20,10 +21,10 @@ const LOADING_MESSAGES = [
 ];
 
 export function PreviewPanel({ projectId }: PreviewPanelProps) {
-    const [status, setStatus] = useState<PreviewState>('loading');
-    const [key, setKey] = useState(0);
-    const [msgIndex, setMsgIndex] = useState(0); // For cycling messages
-
+    const [status, setStatus] = useState<PreviewState>('loading'); // Default to loading on mount
+    const [key, setKey] = useState(0); // For forcing refresh
+    const [msgIndex, setMsgIndex] = useState(0);
+    const [githubUrl, setGithubUrl] = useState<string | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const pollInterval = useRef<NodeJS.Timeout>();
     const timeoutTimer = useRef<NodeJS.Timeout>();
@@ -64,7 +65,13 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
                 if (res.ok) {
                     stopPolling();
                     setStatus('ready');
-                    setKey(prev => prev + 1);
+                    setKey(prev => prev + 1); // Force iframe reload
+                    // Trigger confetti
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
                 }
             } catch (e) {
                 // Ignore errors
@@ -74,6 +81,13 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
 
     useEffect(() => {
         startPolling();
+        // Fetch project for github url
+        fetch(`/api/proxy/projects/${projectId}`).then(res => res.json()).then(data => {
+            if (data.project?.githubUrl) {
+                setGithubUrl(data.project.githubUrl);
+            }
+        }).catch(console.error);
+
         return () => stopPolling();
     }, [projectId, startPolling]);
 
@@ -98,6 +112,29 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
                         <ExternalLink className="w-3 h-3" />
                     </a>
                 </div>
+                <div className="h-3 w-px bg-white/10" />
+
+                {githubUrl && (
+                    <>
+                        <a
+                            href={`https://vercel.com/new/import?repository-url=${encodeURIComponent(githubUrl)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-xs font-medium text-white bg-black hover:bg-neutral-900 px-2 py-0.5 rounded transition-colors"
+                        >
+                            <Rocket className="w-3 h-3" />
+                            Deploy
+                        </a>
+                        <div className="h-3 w-px bg-white/10" />
+                    </>
+                )}
+
+                <button onClick={handleRefresh} className="text-zinc-400 hover:text-white transition-colors">
+                    <RefreshCw className={cn("w-3 h-3", status === 'loading' && "animate-spin")} />
+                </button>
+                <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+                    <ExternalLink className="w-3 h-3" />
+                </a>
             </div>
 
             {/* Loading Overlay */}

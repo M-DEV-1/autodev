@@ -10,6 +10,8 @@ import { WorkspaceService } from './services/workspace';
 import { ClineService } from './services/cline';
 import fs from 'fs';
 import mongoose from "mongoose";
+import archiver from "archiver";
+
 
 dotenv.config();
 
@@ -154,6 +156,47 @@ app.get("/api/projects/:projectId/files", async (req, res) => {
     } catch (error) {
         console.error("Failed to fetch files:", error);
         res.status(500).json({ error: "Failed to fetch files" });
+    }
+});
+
+// Download Route
+app.get("/api/projects/:projectId/download", async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        // Verify project exists
+        const project = await Project.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ error: "Project not found" });
+        }
+
+        const repoPath = WorkspaceService.getRepoPath(projectId);
+        if (!fs.existsSync(repoPath)) {
+            return res.status(404).json({ error: "No code generated yet" });
+        }
+
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'project'}.zip"`);
+
+        const archive = archiver('zip', {
+            zlib: { level: 9 } // Sets the compression level.
+        });
+
+        archive.on('error', function (err) {
+            console.error("Archiver error:", err);
+            res.status(500).send({ error: err.message });
+        });
+
+        // pipe archive data to the file
+        archive.pipe(res);
+
+        // append files from a sub-directory, putting its contents at the root of archive
+        archive.directory(repoPath, false);
+
+        archive.finalize();
+
+    } catch (error) {
+        console.error("Download failed:", error);
+        res.status(500).json({ error: "Download failed" });
     }
 });
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { File, Folder, Search, ChevronRight, ChevronDown, X } from "lucide-react";
+import { File, Folder, Search, ChevronRight, ChevronDown, X, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProjectStore, FileNode } from "@/store/project";
 
@@ -17,8 +17,16 @@ export function FileSystemPanel({ projectId }: FileSystemPanelProps) {
     useEffect(() => {
         if (!projectId) return;
 
+        // Initial Load
         setLoading(true);
         fetchFiles(projectId).finally(() => setLoading(false));
+
+        // Live Polling (Readonly view)
+        const interval = setInterval(() => {
+            fetchFiles(projectId).catch(console.error);
+        }, 3000);
+
+        return () => clearInterval(interval);
     }, [projectId, fetchFiles]);
 
     const toggleFolder = useCallback((path: string) => {
@@ -33,17 +41,8 @@ export function FileSystemPanel({ projectId }: FileSystemPanelProps) {
         });
     }, []);
 
-    // Placeholder for buildTree function, assuming it will be defined elsewhere or is a utility.
-    // For now, we'll just return the files as is to avoid breaking the code.
-    // In a real scenario, `buildTree` would transform the flat `files` array into a hierarchical structure.
-    const buildTree = (nodes: FileNode[]): FileNode[] => {
-        // This is a simplified placeholder. A real buildTree function would construct a tree.
-        // For the current context, we'll assume `files` is already a tree or `buildTree` is a no-op.
-        return nodes;
-    };
-
     const fileStructure = useMemo(() => {
-        return buildTree(files);
+        return files;
     }, [files]);
 
     const FileTreeItem = useMemo(() => {
@@ -90,7 +89,16 @@ export function FileSystemPanel({ projectId }: FileSystemPanelProps) {
             <div className="w-64 border-r border-white/5 flex flex-col bg-[#050505]">
                 <div className="h-10 flex items-center justify-between px-3 border-b border-white/5 shrink-0 bg-black/20">
                     <span className="font-medium text-slate-400">Files</span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                        <a
+                            href={`/api/proxy/projects/${projectId}/download`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-slate-600 hover:text-slate-400"
+                            title="Download Source"
+                        >
+                            <Download className="w-3.5 h-3.5" />
+                        </a>
                         <Search className="w-3.5 h-3.5 text-slate-600 cursor-pointer hover:text-slate-400" />
                         <span className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => {
                             // Refresh
